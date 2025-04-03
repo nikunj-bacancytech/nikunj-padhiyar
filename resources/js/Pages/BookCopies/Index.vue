@@ -4,7 +4,13 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <h1 class="text-xl font-bold">Book copies</h1>
                 <div class="bg-white">
-                    <ResponsiveTable :data="book_copies.data" :headers="headers">
+                    <ResponsiveTable 
+                        :data="book_copies.data" 
+                        :headers="headers"
+                        :links="book_copies.links"
+                        :meta="book_copies.meta"
+                        @per-page-changed="handlePerPageChange"
+                    >
                         <template #actions="actionProps">
                             <DropdownLink
                                 method="post"
@@ -27,6 +33,14 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import ResponsiveTable from "@/Components/ResponsiveTable.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
+import { router } from '@inertiajs/vue3'
+
+const handlePerPageChange = (perPage) => {
+    router.get(route('book-copies.index'), { per_page: perPage }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
 </script>
 
 <script>

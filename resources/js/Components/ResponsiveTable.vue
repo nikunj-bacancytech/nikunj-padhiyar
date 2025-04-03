@@ -86,11 +86,66 @@
     <div class="w-full overflow-hidden" v-if="$slots.footer">
         <slot name="footer"/>
     </div>
+    
+    <div v-if="links && meta" class="px-6 py-4 bg-white border-t">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="text-sm text-gray-600">
+                    Page {{ meta.current_page }} of {{ meta.last_page }} 
+                    ({{ meta.total }} records)
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm text-gray-600">Per page:</label>
+                    <select 
+                        v-model="perPage" 
+                        class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
+                        @change="$emit('per-page-changed', perPage)"
+                    >
+                        <option v-for="size in [10, 25, 50, 100]" :key="size" :value="size">
+                            {{ size }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <Link v-if="links.first"
+                    :href="getPaginationUrl(links.first)"
+                    class="px-3 py-1 rounded hover:bg-gray-100"
+                    :class="{ 'text-gray-400 cursor-not-allowed': meta.current_page === 1 }"
+                >
+                    First
+                </Link>
+                <Link v-if="links.prev"
+                    :href="getPaginationUrl(links.prev)"
+                    class="px-3 py-1 rounded hover:bg-gray-100"
+                >
+                    Previous
+                </Link>
+                <span class="px-3 py-1">
+                    {{ meta.from }}-{{ meta.to }}
+                </span>
+                <Link v-if="links.next"
+                    :href="getPaginationUrl(links.next)"
+                    class="px-3 py-1 rounded hover:bg-gray-100"
+                >
+                    Next
+                </Link>
+                <Link v-if="links.last"
+                    :href="getPaginationUrl(links.last)"
+                    class="px-3 py-1 rounded hover:bg-gray-100"
+                    :class="{ 'text-gray-400 cursor-not-allowed': meta.current_page === meta.last_page }"
+                >
+                    Last
+                </Link>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
 import Dropdown from "@/Components/Dropdown.vue";
 import Checkbox from "@/Components/Checkbox.vue";
+import { Link } from '@inertiajs/vue3';
 import {computed, ref, watch} from "vue";
 import {collect} from "collect.js";
 
@@ -111,6 +166,18 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    links: {
+        type: Object,
+        default: null,
+    },
+    meta: {
+        type: Object,
+        default: null,
+    },
+    perPageOptions: {
+        type: Array,
+        default: () => [10, 25, 50, 100]
+    }
 });
 
 const selectAll = ref(false);
@@ -122,7 +189,8 @@ watch(selectAll, (value) => {
     }
 })
 
-const emit = defineEmits(['update:selected']);
+const emit = defineEmits(['update:selected', 'per-page-changed']);
+const perPage = ref(props.meta?.per_page || 10);
 
 const selectedValues = computed({
     get() {
@@ -137,4 +205,11 @@ const selectedValues = computed({
 function isString(value) {
     return typeof value === 'string';
 }
+
+const getPaginationUrl = (url) => {
+    if (!url) return url;
+    const urlObj = new URL(url);
+    urlObj.searchParams.set('per_page', perPage.value);
+    return urlObj.toString();
+};
 </script>

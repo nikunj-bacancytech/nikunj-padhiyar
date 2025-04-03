@@ -15,7 +15,7 @@ class BookCopyController extends Controller
                 BookCopy::query()
                     ->whereNotReserved()
                     ->applySearchFiltersFrom($request)
-                    ->get()
+                    ->paginate($request->input('per_page', 10))
             )
         ]);
     }
