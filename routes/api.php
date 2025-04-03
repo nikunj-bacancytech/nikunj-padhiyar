@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\BorrowBookController;
+use App\Http\Controllers\Api\ReturnBookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::post('/borrow-book', BorrowBookController::class);
+    Route::post('/return-book', ReturnBookController::class);
 });
